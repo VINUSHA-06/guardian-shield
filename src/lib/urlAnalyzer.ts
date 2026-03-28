@@ -130,14 +130,21 @@ function isLikelyNonExistent(url: string, features: URLFeatures): boolean {
   let hostname = '';
   try { hostname = new URL(url.startsWith('http') ? url : `https://${url}`).hostname; } catch { return true; }
 
+  // Known safe domains are trusted
   if (KNOWN_SAFE_DOMAINS.some(d => hostname === d || hostname.endsWith('.' + d))) return false;
 
-  // Random-looking domains
+  // Well-known large domains that are safe (extended list)
+  const EXTENDED_SAFE = ['yahoo.com', 'bing.com', 'baidu.com', 'zoom.us', 'slack.com', 'notion.so', 'figma.com', 'vercel.app', 'netlify.app', 'heroku.com', 'dropbox.com', 'spotify.com', 'twitch.tv', 'discord.com', 'medium.com', 'quora.com', 'bbc.com', 'cnn.com', 'nytimes.com', 'forbes.com', 'adobe.com', 'salesforce.com', 'shopify.com', 'stripe.com', 'aws.amazon.com', 'cloudflare.com', 'godaddy.com', 'wordpress.com', 'tumblr.com', 'pinterest.com', 'tiktok.com', 'ebay.com', 'aliexpress.com', 'alibaba.com', 'walmart.com', 'target.com', 'bestbuy.com'];
+  if (EXTENDED_SAFE.some(d => hostname === d || hostname.endsWith('.' + d))) return false;
+
+  // Any domain not in our known lists is treated as unknown/potentially non-existent
+  // Random-looking domains get extra suspicion
   const domainBody = hostname.split('.').slice(0, -1).join('.');
   if (domainBody.length > 15 && calcEntropy(domainBody) > 3.8) return true;
-  if (features.tldSuspicious && features.suspiciousKeywords.length === 0 && domainBody.length < 6) return true;
+  if (features.tldSuspicious) return true;
 
-  return false;
+  // Unknown domains not in any safe list → flag as non-existent/unverified
+  return true;
 }
 
 function computeRiskScore(features: URLFeatures, psychology: string[], trust: 'HIGH' | 'LOW', redirect: 'NORMAL' | 'SUSPICIOUS', mismatch: 'LOW' | 'HIGH', isNonExistent: boolean): number {
