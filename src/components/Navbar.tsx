@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Shield, BarChart3, History, Network, AlertTriangle, FlaskConical } from 'lucide-react';
+import { Shield, BarChart3, History, Network, AlertTriangle, FlaskConical, FileText } from 'lucide-react';
 
 const links = [
   { to: '/', label: 'Scanner', icon: Shield },
@@ -8,6 +8,7 @@ const links = [
   { to: '/patterns', label: 'Patterns', icon: Network },
   { to: '/alerts', label: 'Alerts', icon: AlertTriangle },
   { to: '/lab', label: 'Lab', icon: FlaskConical },
+  { to: '/report', label: 'Report', icon: FileText },
 ];
 
 export default function Navbar() {
