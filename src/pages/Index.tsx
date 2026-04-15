@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { analyzeURL, saveToHistory } from '@/lib/urlAnalyzer';
 import type { AnalysisResult } from '@/lib/urlAnalyzer';
+import { pushToFirebase } from '@/lib/firebase';
+import type { FirebaseURLCheck } from '@/lib/firebase';
 import AnalysisCard from '@/components/AnalysisCard';
 import { Search, ShieldCheck } from 'lucide-react';
 
@@ -19,6 +21,15 @@ export default function ScannerPage() {
     saveToHistory(res);
     setResult(res);
     setScanning(false);
+
+    // Push to Firebase
+    const firebaseEntry: FirebaseURLCheck = {
+      url: res.url,
+      risk_score: res.riskScore,
+      status: res.riskScore > 70 ? 'SUSPICIOUS' : 'SAFE',
+      timestamp: Date.now(),
+    };
+    pushToFirebase(firebaseEntry).catch(err => console.error('Firebase push failed:', err));
 
     if (res.riskScore > 70) {
       window.alert(`⚠️ HIGH RISK URL DETECTED!\n\nRisk Score: ${res.riskScore}/100\nPrediction: ${res.prediction}\n\nThis link may be a phishing attack. Proceed with extreme caution!`);
